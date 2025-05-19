@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma MV6 - Abertura de Conta BTG Pactual</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        :root {
+            --primary: #0F2B46;
+            --secondary: #1A4F7C;
+            --tertiary: #2D7FB8;
+            --accent: #F7B32B;
+            --light-bg: #F5F5F5;
+            --dark-text: #333333;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+        }
+        
+        .sidebar {
+            background-color: var(--primary);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--tertiary);
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .step-card {
+            border-left: 4px solid var(--tertiary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: var(--tertiary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+        }
+        
+        .screenshot {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">Plataforma MV6</h4>
+                        <p class="text-white-50">Prop Trading</p>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('client.dashboard') }}">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('client.operacoes') }}">
+                                <i class="bi bi-graph-up me-2"></i>
+                                Operações
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('client.perfil') }}">
+                                <i class="bi bi-person-circle me-2"></i>
+                                Perfil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{ url_for('client.btg_onboarding') }}">
+                                <i class="bi bi-bank me-2"></i>
+                                BTG Pactual
+                            </a>
+                        </li>
+                        <li class="nav-item mt-5">
+                            <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Sair
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Main content -->
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Abertura de Conta no BTG Pactual</h1>
+                </div>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Para utilizar a Plataforma MV6, você precisa ter uma conta no BTG Pactual. Siga o passo a passo abaixo para abrir sua conta.
+                </div>
+                
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Passo a Passo para Abertura de Conta</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="step-card card shadow-sm">
+                            <div class="card-header">
+                                <span class="step-number">1</span>
+                                <strong>Baixe o aplicativo do BTG Pactual</strong>
+                            </div>
+                            <div class="card-body">
+                                <p>Acesse a loja de aplicativos do seu smartphone (App Store ou Google Play) e busque por "BTG Pactual".</p>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <a href="https://apps.apple.com/br/app/btg-pactual-investimentos/id1148806226" target="_blank" class="btn btn-outline-primary mb-2">
+                                            <i class="bi bi-apple me-2"></i>App Store
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a href="https://play.google.com/store/apps/details?id=com.btgpactual.banking" target="_blank" class="btn btn-outline-primary mb-2">
+                                            <i class="bi bi-google-play me-2"></i>Google Play
+                                        </a>
+                                    </div>
+                                </div>
+                                <p class="text-muted">Você também pode abrir sua conta pelo site: <a href="https://www.btgpactualdigital.com" target="_blank">www.btgpactualdigital.com</a></p>
+                            </div>
+                        </div>
+                        
+                        <div class="step-card card shadow-sm">
+                            <div class="card-header">
+                                <span class="step-number">2</span>
+                                <strong>Inicie o processo de abertura de conta</strong>
+                            </div>
+                            <div class="card-body">
+                                <p>Ao abrir o aplicativo, clique em "Abra sua conta" e siga as instruções iniciais:</p>
+                                <ul>
+                                    <li>Informe seu CPF</li>
+                                    <li>Preencha seus dados pessoais (nome completo, data de nascimento, etc.)</li>
+                                    <li>Informe seu endereço completo</li>
+                                    <li>Crie uma senha para acesso ao aplicativo</li>
+                                </ul>
+                                <p>O processo é intuitivo e guiado pelo próprio aplicativo.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step-card card shadow-sm">
+                            <div class="card-header">
+                                <span class="step-number">3</span>
+                                <strong>Envie os documentos necessários</strong>
+                            </div>
+                            <div class="card-body">
+                                <p>Você precisará enviar os seguintes documentos:</p>
+                                <ul>
+                                    <li>Documento de identidade (RG ou CNH) - frente e verso</li>
+                                    <li>Selfie com o documento</li>
+                                    <li>Comprovante de residência (conta de luz, água, telefone, etc.) - emitido nos últimos 3 meses</li>
+                                </ul>
+                                <p>O aplicativo oferece a opção de tirar fotos diretamente ou fazer upload dos documentos.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step-card card shadow-sm">
+                            <div class="card-header">
+                                <span class="step-number">4</span>
+                                <strong>Preencha o Perfil do Investidor</strong>
+                            </div>
+                            <div class="card-body">
+                                <p>O questionário de Perfil do Investidor é obrigatório por regulamentação da CVM. Sugerimos as seguintes respostas para um perfil adequado à operação de Prop Trading:</p>
+                                
+                                <div class="accordion" id="accordionPerfilInvestidor">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="headingOne">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                Sugestões para o Perfil do Investidor
+                                            </button>
+                                        </h2>
+                                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionPerfilInvestidor">
+                                            <div class="accordion-body">
+                                                <table class="table table-bordered">
+                                                    <thead class="table-primary">
+                                                        <tr>
+                                                            <th>Pergunta</th>
+                                                            <th>Resposta Sugerida</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Qual é o seu objetivo ao investir?</td>
+                                                            <td>Obter retornos acima da média do mercado, mesmo com riscos maiores</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Por quanto tempo pretende manter seus investimentos?</td>
+                                                            <td>Médio prazo (1 a 3 anos)</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Qual percentual do seu patrimônio você pretende investir?</td>
+                                                            <td>Entre 10% e 30% do meu patrimônio</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Como você reagiria se seus investimentos sofressem uma queda de 30%?</td>
+                                                            <td>Manteria os investimentos aguardando recuperação</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Qual sua experiência com investimentos?</td>
+                                                            <td>Tenho experiência com diversos tipos de investimentos, incluindo renda variável</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Qual sua fonte principal de renda?</td>
+                                                            <td>Trabalho com carteira assinada ou autônomo</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <p class="text-muted">Estas respostas são sugestões para um perfil "Arrojado" ou "Agressivo", adequado para operações de Prop Trading.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-card card shadow-sm">
+                            <div class="card-header">
+                                <span class="step-number">5</span>
+                                <strong>Contrate a plataforma Metatrader 5</strong>
+                            </div>
+                            <div class="card-body">
+                                <p>Após a aprovação da sua conta, você precisará contratar a plataforma Metatrader 5:</p>
+                                <ol>
+                                    <li>Acesse o aplicativo ou site do BTG Pactual</li>
+                                    <li>Vá em "Investimentos" > "Renda Variável" > "Plataformas"</li>
+                                    <li>Selecione "Metatrader 5"</li>
+                                    <li>Clique em "Contratar" e siga as instruções</li>
+                                </ol>
+                                <p>Após a contratação, você receberá por email as credenciais de acesso (login e senha) da plataforma Metatrader 5.</p>
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>Importante:</strong> Assim que receber as credenciais do Metatrader 5, atualize-as em seu perfil na Plataforma MV6 para que possamos configurar suas operações.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="step-card card shadow-sm">
+                            <div class="card-header">
+                                <span class="step-number">6</span>
+                                <strong>Realize o aporte inicial</strong>
+                            </div>
+                            <div class="card-body">
+                                <p>Para começar a operar, você precisará realizar um aporte inicial em sua conta:</p>
+                                <ol>
+                                    <li>Acesse o aplicativo ou site do BTG Pactual</li>
+                                    <li>Vá em "Transferências" > "Transferir para minha conta"</li>
+                                    <li>Selecione seu banco de origem e realize uma transferência via PIX ou TED</li>
+                                </ol>
+                                <p>Recomendamos um aporte inicial mínimo de R$ 5.000,00 para operações de day trade e R$ 10.000,00 para swing trade.</p>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    <strong>Dica:</strong> Transferências via PIX são processadas instantaneamente, enquanto TEDs podem levar algumas horas.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Configuração do Metatrader 5</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Após receber suas credenciais e realizar o aporte inicial, você precisará configurar a plataforma Metatrader 5:</p>
+                        
+                        <div class="accordion" id="accordionMetatrader">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingDownload">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDownload" aria-expanded="true" aria-controls="collapseDownload">
+                                        1. Download e Instalação
+                                    </button>
+                                </h2>
+                                <div id="collapseDownload" class="accordion-collapse collapse show" aria-labelledby="headingDownload" data-bs-parent="#accordionMetatrader">
+                                    <div class="accordion-body">
+                                        <p>Baixe e instale o Metatrader 5 em seu computador:</p>
+                                        <a href="https://www.metatrader5.com/pt/download" target="_blank" class="btn btn-outline-primary mb-3">
+                                            <i class="bi bi-download me-2"></i>Download Metatrader 5
+                                        </a>
+                                        <p>Siga as instruções de instalação do programa.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingLogin">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLogin" aria-expanded="false" aria-controls="collapseLogin">
+                                        2. Login na Plataforma
+                                    </button>
+                                </h2>
+                                <div id="collapseLogin" class="accordion-collapse collapse" aria-labelledby="headingLogin" data-bs-parent="#accordionMetatrader">
+                                    <div class="accordion-body">
+                                        <p>Ao abrir o Metatrader 5 pela primeira vez:</p>
+                                        <ol>
+                                            <li>Selecione "Arquivo" > "Fazer login na conta de negociação"</li>
+                                            <li>Selecione o servidor "BTG Pactual-Demo" ou "BTG Pactual-Real" (conforme orientação recebida por email)</li>
+                                            <li>Insira o login e senha recebidos por email</li>
+                                            <li>Clique em "Salvar conta" para não precisar inserir as credenciais novamente</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingConfig">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfig" aria-expanded="false" aria-controls="collapseConfig">
+                                        3. Configurações Básicas
+                                    </button>
+                                </h2>
+                                <div id="collapseConfig" class="accordion-collapse collapse" aria-labelledby="headingConfig" data-bs-parent="#accordionMetatrader">
+                                    <div class="accordion-body">
+                                        <p>Configurações recomendadas para iniciantes:</p>
+                                        <ol>
+                                            <li>Adicione os principais ativos ao "Observação de Mercado" (clique com botão direito e selecione "Mostrar Tudo")</li>
+                                            <li>Configure gráficos para os ativos que deseja acompanhar (clique duplo no ativo)</li>
+                                            <li>Ajuste o timeframe dos gráficos conforme sua estratégia (M5, M15, H1, etc.)</li>
+                                            <li>Adicione indicadores técnicos básicos (Médias Móveis, MACD, RSI) clicando em "Inserir" > "Indicadores"</li>
+                                        </ol>
+                                        <p>A Plataforma MV6 fornecerá configurações avançadas e estratégias específicas após a conclusão do seu cadastro.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Próximos Passos</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Após concluir todos os passos acima:</p>
+                        <ol>
+                            <li>Atualize suas credenciais do Metatrader 5 em seu perfil na Plataforma MV6</li>
+                            <li>Aceite os termos e condições da Plataforma MV6</li>
+                            <li>Aguarde a confirmação da nossa equipe para iniciar suas operações</li>
+                        </ol>
+                        <p>Nossa equipe entrará em contato para fornecer orientações adicionais e responder a quaisquer dúvidas.</p>
+                        <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                            <a href="{{ url_for('client.termos') }}" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Prosseguir para Aceite dos Termos
+                            </a>
+                            <a href="{{ url_for('client.dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Voltar para Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

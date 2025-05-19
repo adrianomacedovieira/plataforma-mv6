@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma MV6 - Chat Administrativo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #0F2B46;
+            --secondary: #1A4F7C;
+            --tertiary: #2D7FB8;
+            --accent: #F7B32B;
+            --light-bg: #F5F5F5;
+            --dark-text: #333333;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+        }
+        
+        .sidebar {
+            background-color: var(--primary);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--tertiary);
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .user-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .user-item {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .user-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .user-item.active {
+            background-color: #e9ecef;
+            border-left: 3px solid var(--tertiary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">Plataforma MV6</h4>
+                        <p class="text-white-50">Administração</p>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.clientes') }}">
+                                <i class="bi bi-people me-2"></i>
+                                Clientes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.operacoes') }}">
+                                <i class="bi bi-graph-up me-2"></i>
+                                Operações
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.notificacoes') }}">
+                                <i class="bi bi-bell me-2"></i>
+                                Notificações
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.termos') }}">
+                                <i class="bi bi-file-text me-2"></i>
+                                Contratos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{ url_for('chat.admin') }}">
+                                <i class="bi bi-chat-dots me-2"></i>
+                                Chat
+                                <span id="unread-badge" class="badge bg-danger rounded-pill ms-2 d-none">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.relatorios') }}">
+                                <i class="bi bi-bar-chart me-2"></i>
+                                Relatórios
+                            </a>
+                        </li>
+                        <li class="nav-item mt-5">
+                            <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Sair
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Main content -->
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Chat de Suporte</h1>
+                </div>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Conversas com Clientes</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if users %}
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Clientes</h6>
+                                        </div>
+                                        <div class="list-group user-list">
+                                            {% for user in users %}
+                                                <a href="{{ url_for('chat.admin_conversa', user_id=user.id) }}" class="list-group-item list-group-item-action user-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong>{{ user.nome }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">{{ user.email }}</small>
+                                                    </div>
+                                                    {% if user.unread_count > 0 %}
+                                                        <span class="badge bg-danger rounded-pill">{{ user.unread_count }}</span>
+                                                    {% endif %}
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-body text-center py-5">
+                                            <i class="bi bi-chat-dots display-4 text-muted"></i>
+                                            <p class="mt-3">Selecione um cliente para visualizar a conversa.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-chat-dots display-4 text-muted"></i>
+                                <p class="mt-3">Nenhuma conversa iniciada pelos clientes.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Estatísticas de Atendimento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card text-center mb-3">
+                                    <div class="card-body">
+                                        <h3 class="card-title">{{ users|length }}</h3>
+                                        <p class="card-text">Clientes com conversas</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center mb-3">
+                                    <div class="card-body">
+                                        <h3 class="card-title">5</h3>
+                                        <p class="card-text">Conversas hoje</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center mb-3">
+                                    <div class="card-body">
+                                        <h3 class="card-title">10 min</h3>
+                                        <p class="card-text">Tempo médio de resposta</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center mb-3">
+                                    <div class="card-body">
+                                        <h3 class="card-title">95%</h3>
+                                        <p class="card-text">Satisfação dos clientes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Verificar novas mensagens a cada 30 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            setInterval(checkNewMessages, 30000);
+        });
+        
+        // Função para verificar novas mensagens
+        function checkNewMessages() {
+            fetch('{{ url_for("chat.check_new_messages") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const unreadBadge = document.getElementById('unread-badge');
+                    if (data.unread_count > 0) {
+                        unreadBadge.textContent = data.unread_count;
+                        unreadBadge.classList.remove('d-none');
+                    } else {
+                        unreadBadge.classList.add('d-none');
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

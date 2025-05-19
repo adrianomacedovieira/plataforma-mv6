@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma MV6 - Gerenciamento de Contratos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #0F2B46;
+            --secondary: #1A4F7C;
+            --tertiary: #2D7FB8;
+            --accent: #F7B32B;
+            --light-bg: #F5F5F5;
+            --dark-text: #333333;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+        }
+        
+        .sidebar {
+            background-color: var(--primary);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--tertiary);
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">Plataforma MV6</h4>
+                        <p class="text-white-50">Administração</p>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.clientes') }}">
+                                <i class="bi bi-people me-2"></i>
+                                Clientes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.operacoes') }}">
+                                <i class="bi bi-graph-up me-2"></i>
+                                Operações
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.notificacoes') }}">
+                                <i class="bi bi-bell me-2"></i>
+                                Notificações
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{ url_for('admin.termos') }}">
+                                <i class="bi bi-file-text me-2"></i>
+                                Contratos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.relatorios') }}">
+                                <i class="bi bi-bar-chart me-2"></i>
+                                Relatórios
+                            </a>
+                        </li>
+                        <li class="nav-item mt-5">
+                            <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Sair
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Main content -->
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Gerenciamento de Contratos</h1>
+                </div>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Contrato Ativo</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if termo_ativo %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <strong>Versão atual:</strong> {{ termo_ativo.versao }} (criado em {{ termo_ativo.data_criacao.strftime('%d/%m/%Y') }})
+                            </div>
+                            <div class="border p-3 mb-3" style="max-height: 300px; overflow-y: auto;">
+                                <pre>{{ termo_ativo.texto }}</pre>
+                            </div>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoTermoModal">
+                                <i class="bi bi-pencil me-2"></i>Criar Nova Versão
+                            </button>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Não há contrato ativo no momento. Por favor, crie um novo contrato.
+                            </div>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoTermoModal">
+                                <i class="bi bi-plus-circle me-2"></i>Criar Contrato
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Histórico de Contratos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Versão</th>
+                                        <th>Data de Criação</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for termo in termos %}
+                                    <tr>
+                                        <td>{{ termo.versao }}</td>
+                                        <td>{{ termo.data_criacao.strftime('%d/%m/%Y') }}</td>
+                                        <td>
+                                            <span class="badge {{ 'bg-success' if termo.ativo else 'bg-secondary' }}">
+                                                {{ 'Ativo' if termo.ativo else 'Inativo' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewTermoModal{{ termo.id }}">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Modal para visualizar termo -->
+                                    <div class="modal fade" id="viewTermoModal{{ termo.id }}" tabindex="-1" aria-labelledby="viewTermoModalLabel{{ termo.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="viewTermoModalLabel{{ termo.id }}">Contrato - Versão {{ termo.versao }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <pre style="white-space: pre-wrap;">{{ termo.texto }}</pre>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                                    {% if not termo.ativo %}
+                                                    <button type="button" class="btn btn-primary">Reativar Esta Versão</button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para criar novo termo -->
+    <div class="modal fade" id="novoTermoModal" tabindex="-1" aria-labelledby="novoTermoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="novoTermoModalLabel">Criar Novo Contrato</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{{ url_for('admin.termos') }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="versao" class="form-label">Versão</label>
+                            <input type="text" class="form-control" id="versao" name="versao" required placeholder="Ex: 1.0, 2.0, etc.">
+                        </div>
+                        <div class="mb-3">
+                            <label for="texto" class="form-label">Texto do Contrato</label>
+                            <textarea class="form-control" id="texto" name="texto" rows="15" required></textarea>
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Atenção:</strong> Ao criar um novo contrato, a versão anterior será desativada e todos os novos clientes terão que aceitar esta nova versão.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Contrato</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

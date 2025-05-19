@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma MV6 - Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        :root {
+            --primary: #0F2B46;
+            --secondary: #1A4F7C;
+            --tertiary: #2D7FB8;
+            --accent: #F7B32B;
+            --light-bg: #F5F5F5;
+            --dark-text: #333333;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+        }
+        
+        .sidebar {
+            background-color: var(--primary);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--tertiary);
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .chat-container {
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            max-width: 80%;
+        }
+        
+        .message-client {
+            background-color: #e9ecef;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+        
+        .message-admin {
+            background-color: var(--tertiary);
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+        
+        .message-admin .message-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">Plataforma MV6</h4>
+                        <p class="text-white-50">Prop Trading</p>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('client.dashboard') }}">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('client.operacoes') }}">
+                                <i class="bi bi-graph-up me-2"></i>
+                                Operações
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('client.perfil') }}">
+                                <i class="bi bi-person-circle me-2"></i>
+                                Perfil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('client.btg_onboarding') }}">
+                                <i class="bi bi-bank me-2"></i>
+                                BTG Pactual
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{ url_for('chat.cliente') }}">
+                                <i class="bi bi-chat-dots me-2"></i>
+                                Suporte
+                                <span id="unread-badge" class="badge bg-danger rounded-pill ms-2 d-none">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item mt-5">
+                            <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Sair
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Main content -->
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Suporte</h1>
+                </div>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Chat com a Equipe de Suporte</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chat-container">
+                            <div class="chat-messages">
+                                {% if messages %}
+                                    {% for msg in messages %}
+                                        <div class="message {{ 'message-admin' if msg.is_from_admin else 'message-client' }}">
+                                            <div class="message-content">
+                                                {{ msg.message }}
+                                            </div>
+                                            <div class="message-time">
+                                                {{ msg.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                                {% if msg.is_from_admin %}
+                                                    - Equipe MV6
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center text-muted py-5">
+                                        <i class="bi bi-chat-dots display-4"></i>
+                                        <p class="mt-3">Envie uma mensagem para iniciar a conversa com nossa equipe de suporte.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <form method="POST" action="{{ url_for('chat.enviar') }}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="message" placeholder="Digite sua mensagem..." required>
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="bi bi-send"></i> Enviar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Informações de Contato</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Além do chat, você também pode entrar em contato conosco pelos seguintes canais:</p>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="bi bi-envelope me-2"></i>
+                                <strong>Email:</strong> suporte@plataformamv6.com.br
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-telephone me-2"></i>
+                                <strong>Telefone:</strong> (11) 1234-5678
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-whatsapp me-2"></i>
+                                <strong>WhatsApp:</strong> (11) 98765-4321
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-clock me-2"></i>
+                                <strong>Horário de Atendimento:</strong> Segunda a Sexta, das 9h às 18h
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Rolar para o final do chat ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.querySelector('.chat-messages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Verificar novas mensagens a cada 30 segundos
+            setInterval(checkNewMessages, 30000);
+        });
+        
+        // Função para verificar novas mensagens
+        function checkNewMessages() {
+            fetch('{{ url_for("chat.check_new_messages") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const unreadBadge = document.getElementById('unread-badge');
+                    if (data.unread_count > 0) {
+                        unreadBadge.textContent = data.unread_count;
+                        unreadBadge.classList.remove('d-none');
+                    } else {
+                        unreadBadge.classList.add('d-none');
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
